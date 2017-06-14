@@ -22,6 +22,24 @@ type RespVersions struct {
 	Versions []string `json:"versions"`
 }
 
+// RespPublicRooms is the JSON response for http://matrix.org/speculator/spec/HEAD/client_server/unstable.html#get-matrix-client-unstable-publicrooms
+type RespPublicRooms struct {
+	TotalRoomCountEstimate int    `json:"total_room_count_estimate"`
+	PrevBatch              string `json:"prev_batch"`
+	NextBatch              string `json:"next_batch"`
+	Chunk                  []struct {
+		CanonicalAlias   string   `json:"canonical_alias"`
+		Name             string   `json:"name"`
+		WorldReadable    bool     `json:"world_readable"`
+		Topic            string   `json:"topic"`
+		NumJoinedMembers int      `json:"num_joined_members"`
+		AvatarUrl        string   `json:"avatar_url"`
+		RoomId           string   `json:"room_id"`
+		GuestCanJoin     bool     `json:"guest_can_join"`
+		Aliases          []string `json:"aliases"`
+	} `json:"chunk"`
+}
+
 // RespJoinRoom is the JSON response for http://matrix.org/docs/spec/client_server/r0.2.0.html#post-matrix-client-r0-rooms-roomid-join
 type RespJoinRoom struct {
 	RoomID string `json:"room_id"`

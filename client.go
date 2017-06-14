@@ -370,6 +370,52 @@ func (cli *Client) Versions() (resp *RespVersions, err error) {
 	return
 }
 
+// PublicRooms returns the list of public rooms on target server. Does not require Auth. See http://matrix.org/speculator/spec/HEAD/client_server/unstable.html#get-matrix-client-unstable-publicrooms
+func (cli *Client) PublicRooms(limit int, since string, server string) (resp *RespPublicRooms, err error) {
+	args := map[string]string{}
+
+	if limit != 0 {
+		args["limit"] = strconv.Itoa(limit)
+	}
+	if since != "" {
+		args["since"] = since
+	}
+	if server != "" {
+		args["server"] = server
+	}
+
+	urlPath := cli.BuildURLWithQuery([]string{"publicRooms"}, args)
+	_, err = cli.MakeRequest("GET", urlPath, nil, &resp)
+	return
+}
+
+// PublicRoomsFiltered returns a subset of PublicRooms filtered server side. See http://matrix.org/speculator/spec/HEAD/client_server/unstable.html#post-matrix-client-unstable-publicrooms
+func (cli *Client) PublicRoomsFiltered(limit int, since string, server string, filter string) (resp *RespPublicRooms, err error) {
+	content := map[string]string{}
+
+	if limit != 0 {
+		content["limit"] = strconv.Itoa(limit)
+	}
+	if since != "" {
+		content["since"] = since
+	}
+	if filter != "" {
+		content["filter"] = filter
+	}
+
+	var urlPath string
+	if server == "" {
+		urlPath = cli.BuildURL("publicRooms")
+	} else {
+		urlPath = cli.BuildURLWithQuery([]string{"publicRooms"}, map[string]string{
+			"server": server,
+		})
+	}
+
+	_, err = cli.MakeRequest("POST", urlPath, content, &resp)
+	return
+}
+
 // JoinRoom joins the client to a room ID or alias. See http://matrix.org/docs/spec/client_server/r0.2.0.html#post-matrix-client-r0-join-roomidoralias
 //
 // If serverName is specified, this will be added as a query param to instruct the homeserver to join via that server. If content is specified, it will
@@ -564,7 +610,7 @@ func (cli *Client) StateEvent(roomID, eventType, stateKey string, outContent int
 	return
 }
 
-// UploadLink uploads an HTTP URL and then returns an MXC URI.
+// UploadLink uploads an HTTP URL and then returns an 1 URI.
 func (cli *Client) UploadLink(link string) (*RespMediaUpload, error) {
 	res, err := cli.Client.Get(link)
 	if res != nil {
